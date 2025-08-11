@@ -1,34 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>InvestLearn Pro - Master the Markets</title>
+    <meta name="description" content="Learn how to invest in stocks with interactive lessons, a realistic trading simulator, strategies, glossary, and quizzes. Practice with virtual cash and master order types like market, limit, and stop." />
     <!-- External Stylesheet -->
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <!-- Font Awesome for Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Main">
         <div class="nav-content">
-            <div class="logo">
-                <i class="fas fa-chart-line"></i> InvestLearn Pro
+            <div class="logo" aria-label="Site logo">
+                <i class="fas fa-chart-line" aria-hidden="true"></i> InvestLearn Pro
             </div>
             <ul class="nav-links">
-                <li><a onclick="showPage('home')">Home</a></li>
-                <li><a onclick="showPage('learn')">Learn</a></li>
-                <li><a onclick="showPage('glossary')">Glossary</a></li>
-                <li><a onclick="showPage('simulator')">Simulator</a></li>
-                <li><a onclick="showPage('strategies')">Strategies</a></li>
-                <li><a onclick="showPage('quiz')">Quiz</a></li>
+                <li><a onclick="showPage('home')" role="button">Home</a></li>
+                <li><a onclick="showPage('learn')" role="button">Learn</a></li>
+                <li><a onclick="showPage('glossary')" role="button">Glossary</a></li>
+                <li><a onclick="showPage('simulator')" role="button">Simulator</a></li>
+                <li><a onclick="showPage('strategies')" role="button">Strategies</a></li>
+                <li><a onclick="showPage('quiz')" role="button">Quiz</a></li>
             </ul>
-            <button class="mobile-menu" id="mobileMenuBtn">
+            <button class="mobile-menu" id="mobileMenuBtn" aria-expanded="false" aria-controls="mobileNavLinks" aria-label="Open menu">
                 <i class="fas fa-bars"></i>
             </button>
         </div>
@@ -46,28 +47,28 @@
     <div class="main-container">
         <!-- Home Page -->
         <div id="home" class="page active">
-            <div class="hero">
+            <div class="hero" role="banner">
                 <h1>Master the Art of Investing</h1>
-                <p>Learn, practice, and profit with our comprehensive investment platform.</p>
+                <p>Learn, practice, and build confidence with our comprehensive investment platform.</p>
                 <button class="cta-button" onclick="showPage('learn')">
                     <i class="fas fa-play"></i> Start Your Journey
                 </button>
             </div>
             <div class="features-grid">
                 <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="feature-icon"><i class="fas fa-graduation-cap" aria-hidden="true"></i></div>
                     <h3>Comprehensive Learning</h3>
-                    <p>Master investing fundamentals with our structured curriculum, from basic terms to advanced strategies.</p>
+                    <p>Master fundamentals with a structured curriculum — from terms to advanced strategies.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="feature-icon"><i class="fas fa-chart-bar" aria-hidden="true"></i></div>
                     <h3>Realistic Simulation</h3>
-                    <p>Practice with virtual money in realistic market conditions. Test different scenarios and learn when to buy, sell, or hold.</p>
+                    <p>Practice with $100,000 virtual cash, realistic order handling, and changing market regimes.</p>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon"><i class="fas fa-brain"></i></div>
+                    <div class="feature-icon"><i class="fas fa-brain" aria-hidden="true"></i></div>
                     <h3>Smart Strategies</h3>
-                    <p>Learn proven investment strategies and understand market psychology to make informed, professional-level decisions.</p>
+                    <p>Learn proven approaches and market psychology to make informed decisions.</p>
                 </div>
             </div>
         </div>
@@ -75,59 +76,103 @@
         <!-- Learn Page -->
         <div id="learn" class="page">
             <div class="content-section">
-                <h2><i class="fas fa-book-open"></i> Investment Learning Path</h2>
-                <p>Follow our structured path to become a confident investor. Each lesson builds on the previous one, from beginner to pro.</p>
+                <h2><i class="fas fa-book-open" aria-hidden="true"></i> Investment Learning Path</h2>
+                <p>Follow our structured path from beginner to pro. Lessons unlock concepts you’ll use in the simulator.</p>
                 <div class="progress-bar"><div class="progress-fill" id="learningProgress"></div></div>
                 <p id="progressText">Progress: 0% Complete</p>
             </div>
             <div class="learning-path" id="learningPath">
-                <!-- Lessons will be populated by JavaScript -->
+                <!-- Lessons populated by JavaScript -->
+            </div>
+            <div class="content-section" aria-live="polite">
+                <h3><i class="fas fa-mobile-alt"></i> Placing Orders in Popular Broker Apps</h3>
+                <p><strong>General flow (e.g., Robinhood/Fidelity/Webull):</strong></p>
+                <ol>
+                    <li>Search for a ticker (e.g., AAPL) and open the stock page.</li>
+                    <li>Tap <em>Trade</em> / <em>Buy</em> / <em>Sell</em>.</li>
+                    <li>Select <em>Order Type</em>: Market, Limit, Stop (a stop becomes market when triggered).</li>
+                    <li>Enter <em>Shares</em> (or dollars, if supported), set any <em>limit/stop price</em>.</li>
+                    <li>Review estimated cost, verify <em>Time-In-Force</em> (e.g., Day/Good-’Til-Canceled), and submit.</li>
+                </ol>
+                <p class="note">Exact wording/steps differ slightly by app, but the concepts match what you practice here.</p>
             </div>
         </div>
 
         <!-- Glossary Page -->
         <div id="glossary" class="page">
             <div class="content-section">
-                <h2><i class="fas fa-book"></i> Investment Glossary</h2>
-                <p>Essential terms every investor should know. Click on any term to see a detailed definition.</p>
+                <h2><i class="fas fa-book" aria-hidden="true"></i> Investment Glossary</h2>
+                <p>Essential terms every investor should know. Click a term for details and examples.</p>
             </div>
             <div class="glossary-grid" id="glossaryGrid">
-                <!-- Terms will be populated by JavaScript -->
+                <!-- Terms populated by JavaScript -->
             </div>
         </div>
 
         <!-- Simulator Page -->
         <div id="simulator" class="page">
             <div class="content-section">
-                <h2><i class="fas fa-laptop-code"></i> Investment Simulator</h2>
-                <p>Practice trading with $100,000 in virtual cash. Learn to navigate different market trends and execute orders like a pro.</p>
+                <h2><i class="fas fa-laptop-code" aria-hidden="true"></i> Investment Simulator</h2>
+                <p>Practice trading with $100,000 in virtual cash. Use market, <span class="pill">limit</span>, and <span class="pill">stop</span> orders. Experience bull/bear regimes and manage open orders like a pro.</p>
+                <p class="disclaimer"><strong>Educational only — not financial advice.</strong></p>
             </div>
+
+            <div class="simulator-toolbar content-section">
+                <div class="toolbar-group">
+                    <label for="scenarioSelect">Market Scenario
+                        <i class="fas fa-info-circle tooltip-icon" data-tooltip="Choose a regime to influence trend bias across all stocks."></i>
+                    </label>
+                    <select id="scenarioSelect" aria-label="Market scenario">
+                        <option value="stable">Stable (default)</option>
+                        <option value="bull">Bullish</option>
+                        <option value="bear">Bearish</option>
+                    </select>
+                </div>
+                <div class="toolbar-group">
+                    <button class="action-button ghost" id="shockUpBtn" aria-label="Positive shock"><i class="fas fa-bolt"></i> Shock +</button>
+                    <button class="action-button ghost" id="shockDownBtn" aria-label="Negative shock"><i class="fas fa-bolt"></i> Shock −</button>
+                </div>
+                <div class="toolbar-group right">
+                    <button class="action-button ghost" id="saveBtn"><i class="fas fa-save"></i> Save</button>
+                    <button class="action-button ghost" id="loadBtn"><i class="fas fa-cloud-download-alt"></i> Load</button>
+                    <button class="action-button danger ghost" id="resetBtn"><i class="fas fa-undo"></i> Reset</button>
+                </div>
+            </div>
+
             <div class="simulator-container">
-                <div class="chart-container">
+                <div class="chart-container" aria-live="polite">
                     <div class="chart-header">
                         <h3 id="currentStock">AAPL - Apple Inc.</h3>
                         <div id="currentPrice" class="price-display">$150.00</div>
                     </div>
                     <div class="price-chart">
-                        <canvas id="stockChartCanvas"></canvas>
+                        <canvas id="stockChartCanvas" aria-label="Stock price chart" role="img"></canvas>
                     </div>
                     <div class="stock-controls">
                         <div class="control-group">
                             <label for="stockSelect">Select Stock:</label>
-                            <select id="stockSelect" onchange="changeStock()"></select>
+                            <select id="stockSelect" onchange="changeStock()" aria-label="Select stock"></select>
                         </div>
                         <div class="control-group">
-                            <label for="orderType">Order Type: <i class="fas fa-info-circle tooltip-icon" data-tooltip="Market: Buy/sell immediately at the best available price. Limit: Set a specific price you're willing to pay (or receive). The order only fills at that price or better. Stop-Loss: Automatically sell if a stock drops to a certain price to limit your losses."></i></label>
-                            <select id="orderType"></select>
+                            <label for="orderType">Order Type: 
+                                <i class="fas fa-info-circle tooltip-icon" data-tooltip="Market: fill now at current price. Limit: set your best acceptable price. Stop: becomes a market order when price hits your stop."></i>
+                            </label>
+                            <select id="orderType" aria-label="Order type"></select>
                         </div>
                         <div class="control-group">
                             <label for="shareAmount">Shares:</label>
-                            <input type="number" id="shareAmount" value="10" min="1">
+                            <input type="number" id="shareAmount" value="10" min="1" aria-label="Share amount" />
                         </div>
+
                         <div class="control-group" id="limitPriceGroup" style="display: none;">
                             <label for="limitPrice">Limit Price:</label>
-                            <input type="number" id="limitPrice" step="0.01" placeholder="Set price">
+                            <input type="number" id="limitPrice" step="0.01" placeholder="e.g. 150.00" aria-label="Limit price" />
                         </div>
+                        <div class="control-group" id="stopPriceGroup" style="display: none;">
+                            <label for="stopPrice">Stop Price:</label>
+                            <input type="number" id="stopPrice" step="0.01" placeholder="e.g. 140.00" aria-label="Stop price" />
+                        </div>
+
                         <div class="control-group action-buttons">
                             <button class="action-button buy-button" onclick="tradeStock('buy')"><i class="fas fa-arrow-up"></i> Buy</button>
                             <button class="action-button sell-button" onclick="tradeStock('sell')"><i class="fas fa-arrow-down"></i> Sell</button>
@@ -137,17 +182,24 @@
 
                 <div class="portfolio-panel">
                     <div class="portfolio-summary">
-                        <h3><i class="fas fa-wallet"></i> Your Portfolio</h3>
+                        <h3><i class="fas fa-wallet" aria-hidden="true"></i> Your Portfolio</h3>
                         <div class="summary-item"><span>Cash:</span> <span id="cashBalance">$100,000.00</span></div>
                         <div class="summary-item"><span>Holdings Value:</span> <span id="portfolioValue">$0.00</span></div>
                         <div class="summary-item total"><span>Total Value:</span> <span id="totalValue">$100,000.00</span></div>
                         <div class="summary-item pnl"><span>Profit/Loss:</span> <span id="totalPnL">+$0.00</span></div>
                     </div>
-                    <h4><i class="fas fa-briefcase"></i> Your Holdings</h4>
+
+                    <h4><i class="fas fa-briefcase" aria-hidden="true"></i> Your Holdings</h4>
                     <div class="holdings-list" id="holdingsList">
                         <p class="empty-state">No holdings yet. Start investing!</p>
                     </div>
-                    <h4><i class="fas fa-history"></i> Recent Transactions</h4>
+
+                    <h4><i class="fas fa-list-check" aria-hidden="true"></i> Open Orders</h4>
+                    <div class="orders-list" id="openOrdersList">
+                        <p class="empty-state">No open orders.</p>
+                    </div>
+
+                    <h4><i class="fas fa-history" aria-hidden="true"></i> Recent Transactions</h4>
                     <div class="transaction-history" id="transactionHistory">
                         <p class="empty-state">No transactions yet.</p>
                     </div>
@@ -158,18 +210,18 @@
         <!-- Strategies Page -->
         <div id="strategies" class="page">
             <div class="content-section">
-                <h2><i class="fas fa-lightbulb"></i> Investment Strategies</h2>
+                <h2><i class="fas fa-lightbulb" aria-hidden="true"></i> Investment Strategies</h2>
                 <p>Learn proven strategies that successful investors use to build wealth over time. Click to learn more.</p>
             </div>
             <div class="learning-path" id="strategiesPath">
-                <!-- Strategies will be populated by JavaScript -->
+                <!-- Strategies populated by JavaScript -->
             </div>
         </div>
 
         <!-- Quiz Page -->
         <div id="quiz" class="page">
             <div class="content-section">
-                <h2><i class="fas fa-question-circle"></i> Investment Knowledge Quiz</h2>
+                <h2><i class="fas fa-question-circle" aria-hidden="true"></i> Investment Knowledge Quiz</h2>
                 <p>Test your knowledge and track your progress as you learn.</p>
             </div>
             <div class="quiz-container">
@@ -184,8 +236,8 @@
                         <div class="progress-bar"><div class="progress-fill" id="quizProgress"></div></div>
                     </div>
                     <div class="quiz-question" id="questionText"></div>
-                    <div class="quiz-options" id="quizOptions"></div>
-                    <div class="quiz-feedback" id="quizFeedback"></div>
+                    <div class="quiz-options" id="quizOptions" role="listbox" aria-label="Quiz options"></div>
+                    <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
                     <button class="action-button" id="nextQuestionBtn" style="display: none;">Next Question</button>
                 </div>
                 <div id="quizResults" style="display: none;">
@@ -200,16 +252,20 @@
     </div>
 
     <!-- Modal for Lessons/Glossary/Strategies -->
-    <div id="modal" class="modal-container">
+    <div id="modal" class="modal-container" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
-            <button class="modal-close" id="modalCloseBtn">&times;</button>
+            <button class="modal-close" id="modalCloseBtn" aria-label="Close">&times;</button>
             <h2 id="modalTitle"></h2>
             <div id="modalBody"></div>
         </div>
     </div>
 
     <!-- Notification Element -->
-    <div id="notification" class="notification"></div>
+    <div id="notification" class="notification" role="status" aria-live="polite"></div>
+
+    <footer class="site-footer">
+        <p>© <span id="year"></span> InvestLearn Pro — For education only. Not investment advice.</p>
+    </footer>
 
     <!-- Chart.js Library -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
