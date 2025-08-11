@@ -1,13 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- STATE MANAGEMENT ---
+    // --- STATE ---
     const state = {
         currentPage: 'home',
         portfolio: {
             cash: 100000,
-            holdings: {},
+            holdings: {}, // symbol -> {shares, totalCost}
             transactions: [],
             initialValue: 100000,
         },
+        openOrders: [], // {id, side, type, symbol, shares, price, createdAt}
         stocks: {
             AAPL: { name: 'Apple Inc.', basePrice: 170, volatility: 0.02, trend: 0.0005, history: [] },
             GOOGL: { name: 'Alphabet Inc.', basePrice: 140, volatility: 0.022, trend: 0.0006, history: [] },
@@ -19,134 +20,151 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStock: 'AAPL',
         stockChart: null,
         marketTrend: 'stable', // stable, bull, bear
-        quiz: {
-            questions: [],
-            currentQuestionIndex: 0,
-            score: 0,
-            userAnswers: [],
-        },
+        quiz: { questions: [], currentQuestionIndex: 0, score: 0 },
         learningProgress: 0,
     };
 
     // --- DATA ---
     const contentData = {
         lessons: [
-            { id: 1, level: 'Beginner', title: 'Investment Basics', content: `<h3>What is Investing?</h3><p>Investing is allocating money with the expectation of a positive benefit in the future. In finance, this benefit is called a return. The return may consist of a gain (profit) or a loss realized from the sale of a property or investment, unrealized capital appreciation, or investment income like dividends, interest, or rental income.</p><h3>Risk vs. Reward</h3><p>This is the fundamental trade-off in all investing. Higher potential returns on an investment are generally accompanied by higher risk. There is no guarantee that you will actually get a higher return by accepting more risk. Diversification is a key technique to manage this risk.</p><h3>The Power of Compound Interest</h3><p>Often called the "eighth wonder of the world," compounding is the process where an asset's earnings, from either capital gains or interest, are reinvested to generate additional earnings over time. This growth, calculated on the initial principal and the accumulated earnings from previous periods, can create a snowball effect, making your money grow at an accelerating rate.</p>` },
-            { id: 2, level: 'Beginner', title: 'Stock Market Fundamentals', content: `<h3>What is a Stock?</h3><p>A stock (also known as equity) is a security that represents the ownership of a fraction of a corporation. This entitles the owner of the stock to a proportion of the corporation's assets and profits equal to how much stock they own. Units of stock are called "shares."</p><h3>How Stock Markets Work</h3><p>Stock markets are venues where buyers and sellers meet to exchange shares in publicly traded companies. Major exchanges like the NYSE or NASDAQ provide a regulated and transparent environment for this trading to occur, facilitating price discovery and liquidity.</p>` },
-            { id: 3, level: 'Beginner', title: 'Types of Investments', content: `<h3>Stocks</h3><p>Ownership in a public company.</p><h3>Bonds</h3><p>A loan made by an investor to a borrower (typically corporate or governmental).</p><h3>ETFs (Exchange-Traded Funds)</h3><p>A basket of securities—stocks, bonds, etc.—that you can buy or sell on a stock exchange like a regular stock. They offer diversification and are typically low-cost.</p><h3>Mutual Funds</h3><p>A pool of money collected from many investors to invest in a diversified portfolio of stocks, bonds, or other assets. Managed by professional fund managers.</p>` },
-            { id: 4, level: 'Intermediate', title: 'Understanding Order Types', content: `<h3>Market Order</h3><p>An order to buy or sell a stock immediately at the best available current price. It guarantees execution but not the price.</p><h3>Limit Order</h3><p>An order to buy or sell a stock at a specific price or better. A buy limit order can only be executed at the limit price or lower, and a sell limit order can only be executed at the limit price or higher. It guarantees the price but not execution.</p><h3>Stop-Loss Order</h3><p>An order placed to sell a security when it reaches a certain price. It is designed to limit an investor's loss on a security position. For example, setting a stop-loss order for 10% below the price at which you bought the stock will limit your loss to 10%.</p>` },
-            { id: 5, level: 'Intermediate', title: 'Reading Stock Charts', content: `<h3>What is Technical Analysis?</h3><p>Technical analysis is a trading discipline employed to evaluate investments and identify trading opportunities by analyzing statistical trends gathered from trading activity, such as price movement and volume.</p><h3>Key Indicators</h3><p><strong>Moving Averages (MA):</strong> Smooths out price data to create a single flowing line, making it easier to identify the direction of the trend.</p><p><strong>Relative Strength Index (RSI):</strong> A momentum indicator that measures the speed and change of price movements. RSI oscillates between zero and 100. Traditionally, an asset is considered overbought when RSI is above 70 and oversold when it is below 30.</p>` },
-            { id: 6, level: 'Advanced', title: 'Risk Management', content: `<h3>Diversification</h3><p>The strategy of investing in a variety of assets to reduce the overall risk of a portfolio. The idea is that if one investment performs poorly, the others may offset those losses.</p><h3>Position Sizing</h3><p>The process of determining how many shares or units of a particular security to purchase. Proper position sizing can help manage risk by ensuring that no single investment can have a disproportionately large negative impact on the overall portfolio.</p><h3>Asset Allocation</h3><p>The implementation of an investment strategy that attempts to balance risk versus reward by adjusting the percentage of each asset in an investment portfolio according to the investor's risk tolerance, goals, and investment time horizon.</p>` },
+            { id: 1, level: 'Beginner', title: 'Investment Basics', content: `<h3>What is Investing?</h3><p>Investing is allocating money with the expectation of a positive benefit in the future (a return). Returns can come from capital gains or income (dividends/interest).</p><h3>Risk vs. Reward</h3><p>Higher potential returns typically come with higher risk. <em>Diversification</em> helps manage risk.</p><h3>Compounding</h3><p>Reinvested earnings can snowball over time, accelerating growth.</p>` },
+            { id: 2, level: 'Beginner', title: 'Stock Market Fundamentals', content: `<h3>What is a Stock?</h3><p>A stock represents ownership in a company. Owners (shareholders) share in assets and profits.</p><h3>How Markets Work</h3><p>Exchanges (NYSE/Nasdaq) match buyers and sellers, enabling liquidity and price discovery.</p>` },
+            { id: 3, level: 'Beginner', title: 'Types of Investments', content: `<h3>Stocks</h3><p>Ownership in a public company.</p><h3>Bonds</h3><p>Loans to companies/governments with interest payments.</p><h3>ETFs</h3><p>Baskets of securities that trade like stocks; great for diversification.</p><h3>Mutual Funds</h3><p>Diversified pools of securities managed by professionals.</p>` },
+            { id: 4, level: 'Intermediate', title: 'Understanding Order Types', content: `<h3>Market</h3><p>Executes now at the best available price. Guarantees execution, not price.</p><h3>Limit</h3><p>Sets the worst price you are willing to accept (buy ≤ limit, sell ≥ limit). May not fill.</p><h3>Stop</h3><p>Becomes a market order when the stop price hits (sell stop to limit losses; buy stop to enter on strength).</p>` },
+            { id: 5, level: 'Intermediate', title: 'Reading Stock Charts', content: `<h3>Technical Basics</h3><p>Price trend and momentum can inform timing. Practice, don't predict.</p><h3>Moving Averages (MA)</h3><p>Smoothed lines that help reveal trend direction (e.g., 20/50 period).</p>` },
+            { id: 6, level: 'Advanced', title: 'Risk Management', content: `<h3>Diversification</h3><p>Spread bets across sectors/asset classes.</p><h3>Position Sizing</h3><p>Limit risk per trade (e.g., 1–2% of portfolio).</p><h3>Asset Allocation</h3><p>Mix assets to match your goals and time horizon.</p>` },
         ],
         glossary: [
-            { term: "Bull Market", definition: "A period of generally rising prices. In a bull market, investors are optimistic about the market's future performance." },
-            { term: "Bear Market", definition: "A period of generally falling prices, often defined as a decline of 20% or more from recent highs." },
-            { term: "Dividend", definition: "A distribution of a portion of a company's earnings, decided by the board of directors, to a class of its shareholders." },
-            { term: "P/E Ratio", definition: "The Price-to-Earnings ratio is the ratio for valuing a company that measures its current share price relative to its per-share earnings (EPS)." },
-            { term: "Market Cap", definition: "The total market value of a company's outstanding shares of stock. It is calculated by multiplying the company's share price by the number of shares outstanding." },
-            { term: "Volatility", definition: "A statistical measure of the dispersion of returns for a given security or market index. In most cases, the higher the volatility, the riskier the security." },
-            { term: "Liquidity", definition: "The degree to which an asset can be quickly bought or sold in the market at a price reflecting its current value. Cash is the most liquid asset." },
-            { term: "Blue Chip", definition: "A large, well-established, and financially sound company that has operated for many years and has a reputation for quality and reliability." },
+            { term: "Bull Market", definition: "A period of generally rising prices and optimism." },
+            { term: "Bear Market", definition: "A period of generally falling prices (often −20%+ from highs)." },
+            { term: "Dividend", definition: "A company payout of profits to shareholders." },
+            { term: "P/E Ratio", definition: "Price divided by earnings per share (EPS)." },
+            { term: "Market Cap", definition: "Share price × shares outstanding." },
+            { term: "Volatility", definition: "How much prices fluctuate; higher = riskier." },
+            { term: "Liquidity", definition: "How easily an asset converts to cash at fair value." },
+            { term: "Blue Chip", definition: "Large, financially sound, established company." },
+            { term: "Time-In-Force", definition: "How long an order stays active (e.g., Day, GTC)." },
+            { term: "Stop Order", definition: "Triggers a market order when stop price is hit." }
         ],
         strategies: [
-            { id: 'buyhold', level: 'Beginner', title: 'Buy and Hold', content: `<h3>Overview</h3><p>Buy and hold is a passive investment strategy where an investor buys stocks and holds them for a long period, regardless of fluctuations in the market.</p><h3>Pros:</h3><ul><li>Simple to implement and low maintenance.</li><li>Tax-efficient, as it often results in long-term capital gains, which are taxed at a lower rate.</li><li>Benefits from the power of compounding over time.</li></ul><h3>Cons:</h3><ul><li>Requires patience and discipline to not sell during market downturns.</li><li>Does not protect against prolonged bear markets.</li></ul>` },
-            { id: 'dca', level: 'Beginner', title: 'Dollar-Cost Averaging', content: `<h3>Overview</h3><p>Dollar-cost averaging (DCA) is the practice of investing a fixed dollar amount on a regular schedule, regardless of the share price. It's a way to smooth out the average cost of your investment.</p><h3>How It Works:</h3><p>You invest the same amount of money each period (e.g., $100 per month). You end up buying more shares when prices are low and fewer shares when prices are high.</p><h3>Pros:</h3><ul><li>Reduces the risk of investing a large amount at the wrong time.</li><li>Automates investing and builds discipline.</li><li>Removes emotion from investment decisions.</li></ul>` },
-            { id: 'value', level: 'Intermediate', title: 'Value Investing', content: `<h3>Overview</h3><p>Popularized by Benjamin Graham and Warren Buffett, value investing is the strategy of picking stocks that appear to be trading for less than their intrinsic or book value.</p><h3>How It Works:</h3><p>Value investors actively seek out stocks they believe the market has undervalued. They use financial analysis, such as looking at P/E ratios and financial statements, to find these bargains.</p><h3>Pros:</h3><ul><li>Potential for high returns if the market recognizes the stock's true value.</li><li>Focuses on a company's fundamental health, providing a "margin of safety."</li></ul>` },
-            { id: 'growth', level: 'Advanced', title: 'Growth Investing', content: `<h3>Overview</h3><p>Growth investing is a style of investment strategy focused on capital appreciation. Growth investors seek out companies that are expected to grow at an above-average rate compared to other companies in the market.</p><h3>Characteristics of Growth Stocks:</h3><ul><li>Often in rapidly expanding industries like technology or biotech.</li><li>Tend to reinvest profits back into the business rather than paying dividends.</li><li>May have high P/E ratios, reflecting high expectations for future growth.</li></ul><h3>Risks:</h3><p>Growth stocks can be volatile. If growth expectations are not met, the stock price can fall sharply.</p>` },
+            { id: 'buyhold', level: 'Beginner', title: 'Buy and Hold', content: `<h3>Overview</h3><p>Buy quality and hold long term. Low maintenance and tax-efficient.</p><h3>Cons</h3><ul><li>Requires patience through drawdowns.</li><li>No downside hedge.</li></ul>` },
+            { id: 'dca', level: 'Beginner', title: 'Dollar-Cost Averaging', content: `<h3>Overview</h3><p>Invest the same amount on a schedule. Buys more shares when price is low.</p><h3>Pros</h3><ul><li>Reduces timing risk.</li><li>Builds discipline.</li></ul>` },
+            { id: 'value', level: 'Intermediate', title: 'Value Investing', content: `<h3>Overview</h3><p>Seek businesses trading below intrinsic value (margin of safety).</p>` },
+            { id: 'growth', level: 'Advanced', title: 'Growth Investing', content: `<h3>Overview</h3><p>Focus on companies expected to grow faster than average.</p><h3>Risk</h3><p>Can be volatile; expectations matter.</p>` },
         ],
         quiz: [
-            { question: "What is the primary benefit of diversification in investing?", options: ["Guaranteeing high profits", "Reducing overall portfolio risk", "Avoiding all transaction fees", "Focusing on a single, strong company"], correct: 1 },
-            { question: "A 'bear market' is characterized by:", options: ["Rising prices and investor optimism", "Stable prices for a long period", "Falling prices and investor pessimism", "High trading volume"], correct: 2 },
-            { question: "Which order type guarantees execution but NOT price?", options: ["Limit Order", "Market Order", "Stop Order", "Trailing Stop Order"], correct: 1 },
-            { question: "What does a company's 'Market Cap' represent?", options: ["The company's total debt", "The maximum price a stock can reach", "The total value of all its outstanding shares", "The company's annual profit"], correct: 2 },
-            { question: "Dollar-Cost Averaging (DCA) is a strategy where you:", options: ["Invest a large sum when the market is low", "Sell stocks when they reach a target price", "Invest a fixed amount of money at regular intervals", "Only buy stocks that are going down"], correct: 2 },
-            { question: "A stock's P/E ratio is calculated by dividing the stock's price by its:", options: ["Earnings Per Share (EPS)", "Equity Value", "Annual Dividend", "Total Assets"], correct: 0 },
-            { question: "What is the main purpose of a 'stop-loss' order?", options: ["To buy a stock when it hits a low price", "To lock in profits on a rising stock", "To automatically sell a stock to limit potential losses", "To get a better price than the market offers"], correct: 2 },
-            { question: "An Exchange-Traded Fund (ETF) is best described as:", options: ["A type of high-risk government bond", "A basket of securities that trades on an exchange like a stock", "A savings account with high interest", "A single company's stock"], correct: 1 },
-            { question: "What does 'liquidity' refer to in financial markets?", options: ["How much cash a company has", "The amount of water a company sells", "How easily an asset can be converted into cash without affecting its price", "The flow of dividends to shareholders"], correct: 2 },
-            { question: "Which of these is a key principle of 'Value Investing'?", options: ["Buying popular, fast-growing stocks", "Finding and buying stocks for less than their intrinsic worth", "Trading stocks very frequently for small gains", "Investing based on market rumors"], correct: 1 }
+            { question: "What is the primary benefit of diversification?", options: ["Guaranteeing high profits", "Reducing overall portfolio risk", "Avoiding all fees", "Focusing on one great company"], correct: 1 },
+            { question: "A 'bear market' is characterized by:", options: ["Rising prices", "Stable prices", "Falling prices", "High volume"], correct: 2 },
+            { question: "Which order type guarantees execution but NOT price?", options: ["Limit", "Market", "Stop", "Trailing stop"], correct: 1 },
+            { question: "Market cap represents:", options: ["Total debt", "Max stock price", "Value of all shares outstanding", "Annual profit"], correct: 2 },
+            { question: "DCA means:", options: ["Invest a lump sum at lows", "Sell at target", "Invest fixed amounts regularly", "Buy only falling stocks"], correct: 2 },
+            { question: "P/E ratio = price ÷", options: ["EPS", "Equity value", "Annual dividend", "Total assets"], correct: 0 },
+            { question: "Main purpose of a sell stop:", options: ["Buy at a low", "Lock in profits", "Limit losses automatically", "Beat the market price"], correct: 2 },
+            { question: "An ETF is:", options: ["Risky bond", "Basket trading like a stock", "Savings account", "Single stock"], correct: 1 },
+            { question: "Liquidity refers to:", options: ["Company cash", "Water sold", "Ease of converting to cash at fair price", "Dividend flow"], correct: 2 },
+            { question: "Key principle of value investing:", options: ["Buy popular growth", "Pay less than intrinsic value", "Day-trade often", "Trade rumors"], correct: 1 }
         ]
     };
 
-    // --- DOM ELEMENTS ---
+    // --- DOM ---
     const pages = document.querySelectorAll('.page');
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
     const mobileNavLinks = document.getElementById('mobileNavLinks');
     const modal = document.getElementById('modal');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
-    
-    // --- INITIALIZATION ---
+
+    // --- HELPERS ---
+    const $ = (id) => document.getElementById(id);
+    const format = (n) => `$${Number(n).toFixed(2)}`;
+    const nowStr = () => new Date().toLocaleString();
+    const uid = () => `${Date.now()}-${Math.floor(Math.random() * 1e6)}`;
+
+    // --- INIT ---
     const init = () => {
-        // Populate dynamic content
+        // Footer year
+        $('year').textContent = new Date().getFullYear();
+
         populateSelects();
         populateLearningContent();
         populateGlossary();
         populateStrategies();
 
-        // Setup simulator
         initChart();
         generateInitialStockHistory();
         updateDisplay();
 
-        // Setup quiz
+        // Quiz
         state.quiz.questions = contentData.quiz;
-        document.getElementById('totalQuestions').textContent = state.quiz.questions.length;
+        $('totalQuestions').textContent = state.quiz.questions.length;
 
-        // Setup event listeners
+        // Events
         setupEventListeners();
 
-        // Start market simulation
-        setInterval(updateStockPrices, 3000); // Update every 3 seconds
-        setInterval(changeMarketTrend, 30000); // Change trend every 30 seconds
+        // Market loops
+        setInterval(tickMarket, 3000);  // price updates
+        setInterval(changeMarketTrend, 30000); // regime change
     };
 
-    // --- PAGE NAVIGATION ---
+    // --- NAVIGATION ---
     const showPage = (pageId) => {
-        pages.forEach(page => page.classList.remove('active'));
-        document.getElementById(pageId).classList.add('active');
+        pages.forEach(p => p.classList.remove('active'));
+        $(pageId).classList.add('active');
         state.currentPage = pageId;
         window.scrollTo(0, 0);
-        
-        // Close mobile menu on navigation
         mobileNavLinks.classList.remove('active');
+        mobileMenuBtn.setAttribute('aria-expanded', 'false');
     };
-    window.showPage = showPage; // Make it accessible from HTML onclick
+    window.showPage = showPage;
 
-    // --- EVENT LISTENERS ---
+    // --- EVENTS ---
     const setupEventListeners = () => {
         mobileMenuBtn.addEventListener('click', () => {
-            mobileNavLinks.classList.toggle('active');
+            const active = mobileNavLinks.classList.toggle('active');
+            mobileMenuBtn.setAttribute('aria-expanded', String(active));
         });
 
         modalCloseBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
-        document.getElementById('orderType').addEventListener('change', (e) => {
-            document.getElementById('limitPriceGroup').style.display = e.target.value === 'limit' ? 'block' : 'none';
-        });
+        $('orderType').addEventListener('change', onOrderTypeChange);
 
-        document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
-        document.getElementById('nextQuestionBtn').addEventListener('click', nextQuestion);
+        $('startQuizBtn').addEventListener('click', startQuiz);
+        $('nextQuestionBtn').addEventListener('click', nextQuestion);
+
+        $('scenarioSelect').addEventListener('change', (e) => {
+            state.marketTrend = e.target.value;
+            notify(`Market scenario set to: ${state.marketTrend}`, 'info');
+        });
+        $('shockUpBtn').addEventListener('click', () => shockMarket(+0.03));
+        $('shockDownBtn').addEventListener('click', () => shockMarket(-0.03));
+
+        $('saveBtn').addEventListener('click', saveState);
+        $('loadBtn').addEventListener('click', loadState);
+        $('resetBtn').addEventListener('click', resetState);
     };
 
-    // --- DYNAMIC CONTENT POPULATION ---
+    const onOrderTypeChange = () => {
+        const type = $('orderType').value;
+        $('limitPriceGroup').style.display = type === 'limit' ? 'block' : 'none';
+        $('stopPriceGroup').style.display = type === 'stop' ? 'block' : 'none';
+    };
+
+    // --- POPULATE ---
     const populateSelects = () => {
-        const stockSelect = document.getElementById('stockSelect');
-        stockSelect.innerHTML = Object.keys(state.stocks).map(symbol => 
+        const stockSelect = $('stockSelect');
+        stockSelect.innerHTML = Object.keys(state.stocks).map(symbol =>
             `<option value="${symbol}">${symbol} - ${state.stocks[symbol].name}</option>`
         ).join('');
 
-        const orderTypeSelect = document.getElementById('orderType');
+        const orderTypeSelect = $('orderType');
         const orderTypes = ['market', 'limit', 'stop'];
-        orderTypeSelect.innerHTML = orderTypes.map(type => 
+        orderTypeSelect.innerHTML = orderTypes.map(type =>
             `<option value="${type}">${type.charAt(0).toUpperCase() + type.slice(1)} Order</option>`
         ).join('');
     };
 
     const populateLearningContent = () => {
-        const learningPath = document.getElementById('learningPath');
+        const learningPath = $('learningPath');
         learningPath.innerHTML = contentData.lessons.map(lesson => `
             <div class="lesson-card" onclick="openModal('lesson', ${lesson.id})">
                 <span class="lesson-status status-${lesson.level.toLowerCase()}">${lesson.level}</span>
@@ -156,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const populateGlossary = () => {
-        const glossaryGrid = document.getElementById('glossaryGrid');
+        const glossaryGrid = $('glossaryGrid');
         glossaryGrid.innerHTML = contentData.glossary.map(item => `
             <div class="term-card" onclick="openModal('glossary', '${item.term}')">
                 <h3>${item.term}</h3>
@@ -165,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const populateStrategies = () => {
-        const strategiesPath = document.getElementById('strategiesPath');
+        const strategiesPath = $('strategiesPath');
         strategiesPath.innerHTML = contentData.strategies.map(strategy => `
             <div class="lesson-card" onclick="openModal('strategy', '${strategy.id}')">
                 <span class="lesson-status status-${strategy.level.toLowerCase()}">${strategy.level}</span>
@@ -183,20 +201,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const glossItem = contentData.glossary.find(g => g.term === id);
             item = { title: glossItem.term, content: `<p>${glossItem.definition}</p>` };
         }
-
         if (item) {
-            document.getElementById('modalTitle').textContent = item.title;
-            document.getElementById('modalBody').innerHTML = item.content;
+            $('modalTitle').textContent = item.title;
+            $('modalBody').innerHTML = item.content;
             modal.classList.add('show');
         }
     };
     window.openModal = openModal;
-
     const closeModal = () => modal.classList.remove('show');
 
-    // --- SIMULATOR: CHART ---
+    // --- CHART ---
     const initChart = () => {
-        const ctx = document.getElementById('stockChartCanvas').getContext('2d');
+        const ctx = $('stockChartCanvas').getContext('2d');
         state.stockChart = new Chart(ctx, {
             type: 'line',
             data: {
@@ -210,6 +226,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     pointRadius: 0,
                     tension: 0.4,
                     fill: true,
+                },
+                {
+                    label: '20-period MA',
+                    data: [],
+                    borderColor: 'rgba(118, 75, 162, 1)',
+                    borderWidth: 1.5,
+                    pointRadius: 0,
+                    tension: 0.2,
+                    fill: false
                 }]
             },
             options: {
@@ -217,21 +242,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintainAspectRatio: false,
                 scales: {
                     x: { display: false },
-                    y: { 
-                        ticks: {
-                            callback: value => '$' + value.toFixed(2)
-                        }
-                    }
+                    y: { ticks: { callback: v => '$' + Number(v).toFixed(2) } }
                 },
                 plugins: {
                     legend: { display: false },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        callbacks: {
-                            label: context => `$${context.parsed.y.toFixed(2)}`
-                        }
-                    }
+                    tooltip: { mode: 'index', intersect: false, callbacks: { label: ctx => `$${ctx.parsed.y.toFixed(2)}` } }
                 },
             }
         });
@@ -240,12 +255,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateChart = () => {
         if (!state.stockChart) return;
         const stockData = state.stocks[state.currentStock];
-        state.stockChart.data.labels = stockData.history.map((_, i) => i);
-        state.stockChart.data.datasets[0].data = stockData.history;
-        state.stockChart.update('none'); // 'none' for no animation
+        const prices = stockData.history;
+        const labels = prices.map((_, i) => i);
+        const ma20 = movingAverage(prices, 20);
+
+        state.stockChart.data.labels = labels;
+        state.stockChart.data.datasets[0].data = prices;
+        state.stockChart.data.datasets[1].data = ma20;
+        state.stockChart.update('none');
     };
 
-    // --- SIMULATOR: MARKET LOGIC ---
+    const movingAverage = (arr, period) => {
+        const out = [];
+        for (let i = 0; i < arr.length; i++) {
+            const start = Math.max(0, i - period + 1);
+            const slice = arr.slice(start, i + 1);
+            const avg = slice.reduce((a, b) => a + b, 0) / slice.length;
+            out.push(avg);
+        }
+        return out;
+    };
+
+    // --- MARKET ENGINE ---
     const generateInitialStockHistory = () => {
         Object.keys(state.stocks).forEach(symbol => {
             const stock = state.stocks[symbol];
@@ -253,24 +284,24 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < 100; i++) {
                 const change = (Math.random() - 0.5) * stock.volatility;
                 price *= (1 + change + stock.trend);
-                stock.history.push(price);
+                stock.history.push(Math.max(price, stock.basePrice * 0.2));
             }
         });
     };
 
-    const updateStockPrices = () => {
+    const tickMarket = () => {
         Object.keys(state.stocks).forEach(symbol => {
             const stock = state.stocks[symbol];
-            const trendMultiplier = state.marketTrend === 'bull' ? 1.5 : state.marketTrend === 'bear' ? -1.5 : 1;
-            const change = (Math.random() - 0.48) * stock.volatility; // slight positive bias
-            let newPrice = stock.history[stock.history.length - 1] * (1 + change + (stock.trend * trendMultiplier));
-            newPrice = Math.max(newPrice, stock.basePrice * 0.2); // Prevent price from going to zero
-            
+            const trendMult = state.marketTrend === 'bull' ? 1.6 : state.marketTrend === 'bear' ? -1.6 : 1;
+            const drift = stock.trend * trendMult;
+            const change = (Math.random() - 0.48) * stock.volatility; // slight upward bias
+            let newPrice = stock.history[stock.history.length - 1] * (1 + change + drift);
+            newPrice = Math.max(newPrice, stock.basePrice * 0.2);
             stock.history.push(newPrice);
-            if (stock.history.length > 100) {
-                stock.history.shift();
-            }
+            if (stock.history.length > 200) stock.history.shift();
         });
+
+        processOpenOrders(); // check triggers and fills
         updateDisplay();
     };
 
@@ -279,142 +310,207 @@ document.addEventListener('DOMContentLoaded', () => {
         const newTrend = trends[Math.floor(Math.random() * trends.length)];
         if (newTrend !== state.marketTrend) {
             state.marketTrend = newTrend;
-            const trendText = state.marketTrend.charAt(0).toUpperCase() + state.marketTrend.slice(1);
-            showNotification(`The market trend is now: ${trendText}`, 'info');
+            notify(`The market trend is now: ${newTrend[0].toUpperCase() + newTrend.slice(1)}`, 'info');
         }
+    };
+
+    const shockMarket = (magnitude = 0.03) => {
+        Object.values(state.stocks).forEach(stock => {
+            const last = stock.history[stock.history.length - 1];
+            const shocked = Math.max(last * (1 + magnitude), stock.basePrice * 0.2);
+            stock.history[stock.history.length - 1] = shocked;
+        });
+        processOpenOrders();
+        updateDisplay();
+        notify(`Applied a market shock (${magnitude > 0 ? '+' : ''}${Math.round(magnitude * 100)}%)`, 'info');
     };
 
     window.changeStock = () => {
-        state.currentStock = document.getElementById('stockSelect').value;
+        state.currentStock = $('stockSelect').value;
         updateDisplay();
     };
 
-    // --- SIMULATOR: TRADING LOGIC ---
-    window.tradeStock = (type) => {
+    // --- TRADING ---
+    window.tradeStock = (side) => {
         const symbol = state.currentStock;
-        const shares = parseInt(document.getElementById('shareAmount').value);
-        const orderType = document.getElementById('orderType').value;
-        const limitPrice = parseFloat(document.getElementById('limitPrice').value);
-        const currentPrice = state.stocks[symbol].history[state.stocks[symbol].history.length - 1];
-        
-        if (isNaN(shares) || shares <= 0) {
-            showNotification('Please enter a valid number of shares.', 'error');
+        const shares = parseInt($('shareAmount').value, 10);
+        const orderType = $('orderType').value;
+        const limitPrice = parseFloat($('limitPrice').value);
+        const stopPrice = parseFloat($('stopPrice').value);
+        const currentPrice = getCurrentPrice(symbol);
+
+        if (isNaN(shares) || shares <= 0) return notify('Please enter a valid number of shares.', 'error');
+
+        if (orderType === 'market') {
+            executeMarketOrder(side, symbol, shares, currentPrice);
             return;
         }
 
-        let executionPrice = currentPrice;
-
         if (orderType === 'limit') {
-            if (isNaN(limitPrice) || limitPrice <= 0) {
-                showNotification('Please enter a valid limit price.', 'error');
-                return;
+            if (isNaN(limitPrice) || limitPrice <= 0) return notify('Enter a valid limit price.', 'error');
+            // Immediate fill if price is favorable; otherwise queue as open limit order
+            if ((side === 'buy' && currentPrice <= limitPrice) || (side === 'sell' && currentPrice >= limitPrice)) {
+                executeLimitOrder(side, symbol, shares, limitPrice, currentPrice);
+            } else {
+                // Place order
+                enqueueOrder({ side, type: 'limit', symbol, shares, price: limitPrice });
+                notify(`${side.toUpperCase()} LIMIT placed for ${shares} ${symbol} @ ${format(limitPrice)}`, 'info');
             }
-            if (type === 'buy' && limitPrice < currentPrice) {
-                showNotification(`Limit price ($${limitPrice.toFixed(2)}) is below market price. Order not filled.`, 'info');
-                return;
-            }
-            if (type === 'sell' && limitPrice > currentPrice) {
-                showNotification(`Limit price ($${limitPrice.toFixed(2)}) is above market price. Order not filled.`, 'info');
-                return;
-            }
-            executionPrice = limitPrice;
+            return;
         }
-        
-        const totalCost = shares * executionPrice;
 
-        if (type === 'buy') {
-            if (state.portfolio.cash < totalCost) {
-                showNotification('Not enough cash to complete this purchase.', 'error');
-                return;
+        if (orderType === 'stop') {
+            if (isNaN(stopPrice) || stopPrice <= 0) return notify('Enter a valid stop price.', 'error');
+            // Stop becomes market when triggered; if already triggered, fill immediately
+            if ((side === 'sell' && currentPrice <= stopPrice) || (side === 'buy' && currentPrice >= stopPrice)) {
+                executeMarketOrder(side, symbol, shares, currentPrice);
+            } else {
+                enqueueOrder({ side, type: 'stop', symbol, shares, price: stopPrice });
+                notify(`${side.toUpperCase()} STOP placed for ${shares} ${symbol} @ ${format(stopPrice)} (triggers into market)`, 'info');
             }
-            state.portfolio.cash -= totalCost;
+            return;
+        }
+    };
+
+    const enqueueOrder = (order) => {
+        state.openOrders.unshift({ id: uid(), createdAt: nowStr(), ...order });
+        if (state.openOrders.length > 50) state.openOrders.pop();
+        renderOpenOrders();
+    };
+
+    const cancelOrder = (id) => {
+        state.openOrders = state.openOrders.filter(o => o.id !== id);
+        renderOpenOrders();
+        notify('Order canceled.', 'info');
+    };
+
+    const getCurrentPrice = (symbol) => {
+        const s = state.stocks[symbol];
+        return s.history[s.history.length - 1];
+    };
+
+    const executeMarketOrder = (side, symbol, shares, price) => {
+        const px = price; // could add slippage later
+        const cost = shares * px;
+
+        if (side === 'buy') {
+            if (state.portfolio.cash < cost) return notify('Not enough cash to buy.', 'error');
+            state.portfolio.cash -= cost;
             const holding = state.portfolio.holdings[symbol] || { shares: 0, totalCost: 0 };
-            holding.totalCost += totalCost;
             holding.shares += shares;
+            holding.totalCost += cost;
             state.portfolio.holdings[symbol] = holding;
-            showNotification(`Bought ${shares} shares of ${symbol} at $${executionPrice.toFixed(2)}`, 'success');
-        } else { // Sell
+            addTransaction('buy', symbol, shares, px);
+            notify(`Bought ${shares} ${symbol} @ ${format(px)}`, 'success');
+        } else {
             const holding = state.portfolio.holdings[symbol];
-            if (!holding || holding.shares < shares) {
-                showNotification(`You don't own enough shares of ${symbol}.`, 'error');
-                return;
-            }
-            const costOfSoldShares = (holding.totalCost / holding.shares) * shares;
-            holding.totalCost -= costOfSoldShares;
+            if (!holding || holding.shares < shares) return notify(`You don't own enough ${symbol}.`, 'error');
+            // reduce average cost proportionally
+            const avgCost = holding.totalCost / holding.shares;
+            const costOfSold = avgCost * shares;
             holding.shares -= shares;
-            if (holding.shares === 0) {
-                delete state.portfolio.holdings[symbol];
-            }
-            state.portfolio.cash += totalCost;
-            showNotification(`Sold ${shares} shares of ${symbol} at $${executionPrice.toFixed(2)}`, 'success');
+            holding.totalCost -= costOfSold;
+            if (holding.shares === 0) delete state.portfolio.holdings[symbol];
+
+            state.portfolio.cash += cost;
+            addTransaction('sell', symbol, shares, px);
+            notify(`Sold ${shares} ${symbol} @ ${format(px)}`, 'success');
         }
 
-        addTransaction(type, symbol, shares, executionPrice);
         updateDisplay();
     };
 
-    const addTransaction = (type, symbol, shares, price) => {
-        state.portfolio.transactions.unshift({
-            type, symbol, shares, price,
-            timestamp: new Date().toLocaleString()
-        });
-        if (state.portfolio.transactions.length > 20) {
-            state.portfolio.transactions.pop();
-        }
+    const executeLimitOrder = (side, symbol, shares, limitPrice, currentPrice) => {
+        // In real markets, fills at best price. Use favorable price between current and limit.
+        // Buy fills at min(current, limit), Sell fills at max(current, limit).
+        const execPx = side === 'buy' ? Math.min(currentPrice, limitPrice) : Math.max(currentPrice, limitPrice);
+        executeMarketOrder(side, symbol, shares, execPx);
     };
 
-    // --- DISPLAY UPDATES ---
+    const processOpenOrders = () => {
+        if (state.openOrders.length === 0) return;
+        const remaining = [];
+        for (const order of state.openOrders) {
+            const currentPrice = getCurrentPrice(order.symbol);
+            if (order.type === 'limit') {
+                const canFill = (order.side === 'buy' && currentPrice <= order.price) ||
+                                (order.side === 'sell' && currentPrice >= order.price);
+                if (canFill) {
+                    executeLimitOrder(order.side, order.symbol, order.shares, order.price, currentPrice);
+                    continue;
+                }
+            } else if (order.type === 'stop') {
+                const triggered = (order.side === 'sell' && currentPrice <= order.price) ||
+                                  (order.side === 'buy' && currentPrice >= order.price);
+                if (triggered) {
+                    executeMarketOrder(order.side, order.symbol, order.shares, currentPrice);
+                    continue;
+                }
+            }
+            remaining.push(order);
+        }
+        state.openOrders = remaining;
+        renderOpenOrders();
+    };
+
+    const addTransaction = (type, symbol, shares, price) => {
+        state.portfolio.transactions.unshift({ type, symbol, shares, price, timestamp: nowStr() });
+        if (state.portfolio.transactions.length > 40) state.portfolio.transactions.pop();
+    };
+
+    // --- DISPLAY ---
     const updateDisplay = () => {
         const portfolio = state.portfolio;
         const currentStockData = state.stocks[state.currentStock];
-        const currentPrice = currentStockData.history[currentStockData.history.length - 1];
+        const currentPrice = getCurrentPrice(state.currentStock);
 
-        // Update chart and price
-        document.getElementById('currentStock').textContent = `${state.currentStock} - ${currentStockData.name}`;
-        const priceElement = document.getElementById('currentPrice');
-        const oldPrice = parseFloat(priceElement.textContent.replace('$', '')) || currentPrice;
-        priceElement.textContent = `$${currentPrice.toFixed(2)}`;
-        priceElement.style.color = currentPrice >= oldPrice ? 'var(--success-color)' : 'var(--danger-color)';
+        // Header + price
+        $('currentStock').textContent = `${state.currentStock} - ${currentStockData.name}`;
+        const priceElement = $('currentPrice');
+        const old = parseFloat(priceElement.textContent.replace('$', '')) || currentPrice;
+        priceElement.textContent = format(currentPrice);
+        priceElement.style.color = currentPrice >= old ? 'var(--success-color)' : 'var(--danger-color)';
+
+        // Chart
         updateChart();
 
-        // Update portfolio summary
+        // Holdings value
         let holdingsValue = 0;
         Object.keys(portfolio.holdings).forEach(symbol => {
-            const holding = portfolio.holdings[symbol];
-            const price = state.stocks[symbol].history[state.stocks[symbol].history.length - 1];
-            holdingsValue += holding.shares * price;
+            const h = portfolio.holdings[symbol];
+            const px = getCurrentPrice(symbol);
+            holdingsValue += h.shares * px;
         });
-
         const totalValue = portfolio.cash + holdingsValue;
         const pnl = totalValue - portfolio.initialValue;
 
-        document.getElementById('cashBalance').textContent = `$${portfolio.cash.toFixed(2)}`;
-        document.getElementById('portfolioValue').textContent = `$${holdingsValue.toFixed(2)}`;
-        document.getElementById('totalValue').textContent = `$${totalValue.toFixed(2)}`;
-        const pnlElement = document.getElementById('totalPnL');
-        pnlElement.textContent = `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
-        pnlElement.style.color = pnl >= 0 ? '#4CAF50' : '#f44336';
+        $('cashBalance').textContent = format(portfolio.cash);
+        $('portfolioValue').textContent = format(holdingsValue);
+        $('totalValue').textContent = format(totalValue);
+        const pnlEl = $('totalPnL');
+        pnlEl.textContent = `${pnl >= 0 ? '+' : ''}${format(pnl)}`;
+        pnlEl.style.color = pnl >= 0 ? 'var(--success-color)' : 'var(--danger-color)';
 
-        // Update holdings list
-        const holdingsList = document.getElementById('holdingsList');
+        // Holdings list
+        const holdingsList = $('holdingsList');
         if (Object.keys(portfolio.holdings).length === 0) {
             holdingsList.innerHTML = '<p class="empty-state">No holdings yet. Start investing!</p>';
         } else {
-            holdingsList.innerHTML = Object.entries(portfolio.holdings).map(([symbol, holding]) => {
-                const price = state.stocks[symbol].history[state.stocks[symbol].history.length - 1];
-                const avgPrice = holding.totalCost / holding.shares;
-                const currentValue = holding.shares * price;
-                const holdingPnl = currentValue - holding.totalCost;
+            holdingsList.innerHTML = Object.entries(portfolio.holdings).map(([symbol, h]) => {
+                const px = getCurrentPrice(symbol);
+                const avg = h.totalCost / h.shares;
+                const value = h.shares * px;
+                const hpnl = value - h.totalCost;
                 return `
                     <div class="holding-item">
                         <div>
                             <strong>${symbol}</strong><br>
-                            <small>${holding.shares} shares @ $${avgPrice.toFixed(2)}</small>
+                            <small>${h.shares} shares @ ${format(avg)}</small>
                         </div>
-                        <div style="text-align: right;">
-                            <strong>$${currentValue.toFixed(2)}</strong><br>
-                            <small class="holding-pnl" style="color: ${holdingPnl >= 0 ? 'var(--success-color)' : 'var(--danger-color)'};">
-                                ${holdingPnl >= 0 ? '+' : ''}$${holdingPnl.toFixed(2)}
+                        <div style="text-align:right;">
+                            <strong>${format(value)}</strong><br>
+                            <small class="holding-pnl" style="color:${hpnl >= 0 ? 'var(--success-color)' : 'var(--danger-color)'}">
+                                ${hpnl >= 0 ? '+' : ''}${format(hpnl)}
                             </small>
                         </div>
                     </div>
@@ -422,24 +518,46 @@ document.addEventListener('DOMContentLoaded', () => {
             }).join('');
         }
 
-        // Update transaction history
-        const transactionHistory = document.getElementById('transactionHistory');
+        // Transactions
+        const txBox = $('transactionHistory');
         if (portfolio.transactions.length === 0) {
-            transactionHistory.innerHTML = '<p class="empty-state">No transactions yet.</p>';
+            txBox.innerHTML = '<p class="empty-state">No transactions yet.</p>';
         } else {
-            transactionHistory.innerHTML = portfolio.transactions.map(tx => `
+            txBox.innerHTML = portfolio.transactions.map(tx => `
                 <div class="transaction-item">
                     <strong class="tx-${tx.type}">${tx.type.toUpperCase()} ${tx.symbol}</strong>
-                    <span>${tx.shares} shares at $${tx.price.toFixed(2)}</span>
+                    <span> ${tx.shares} shares @ ${format(tx.price)} — <small>${tx.timestamp}</small></span>
                 </div>
             `).join('');
         }
+
+        renderOpenOrders();
     };
 
-    // --- QUIZ LOGIC ---
+    const renderOpenOrders = () => {
+        const box = $('openOrdersList');
+        if (state.openOrders.length === 0) {
+            box.innerHTML = '<p class="empty-state">No open orders.</p>';
+            return;
+        }
+        box.innerHTML = state.openOrders.map(o => `
+            <div class="order-item">
+                <div>
+                    <strong>${o.side.toUpperCase()} ${o.symbol}</strong>
+                    <div class="order-meta">${o.type.toUpperCase()} • ${o.shares} shares • ${o.type === 'stop' ? 'Stop' : 'Limit'} ${format(o.price)} • <small>${o.createdAt}</small></div>
+                </div>
+                <div class="order-actions">
+                    <button onclick="cancelOrder('${o.id}')" aria-label="Cancel order ${o.id}"><i class="fas fa-times"></i> Cancel</button>
+                </div>
+            </div>
+        `).join('');
+    };
+    window.cancelOrder = cancelOrder;
+
+    // --- QUIZ ---
     const startQuiz = () => {
-        document.getElementById('quizStart').style.display = 'none';
-        document.getElementById('quizArea').style.display = 'block';
+        $('quizStart').style.display = 'none';
+        $('quizArea').style.display = 'block';
         state.quiz.currentQuestionIndex = 0;
         state.quiz.score = 0;
         displayQuestion();
@@ -447,54 +565,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const displayQuestion = () => {
         const quiz = state.quiz;
-        if (quiz.currentQuestionIndex >= quiz.questions.length) {
-            showQuizResults();
-            return;
-        }
+        if (quiz.currentQuestionIndex >= quiz.questions.length) return showQuizResults();
 
-        const question = quiz.questions[quiz.currentQuestionIndex];
-        document.getElementById('currentQuestionNum').textContent = quiz.currentQuestionIndex + 1;
-        document.getElementById('questionText').textContent = question.question;
+        const q = quiz.questions[quiz.currentQuestionIndex];
+        $('currentQuestionNum').textContent = quiz.currentQuestionIndex + 1;
+        $('questionText').textContent = q.question;
 
-        const optionsContainer = document.getElementById('quizOptions');
-        optionsContainer.innerHTML = question.options.map((option, index) => 
-            `<div class="quiz-option" data-index="${index}">${option}</div>`
-        ).join('');
-        
-        optionsContainer.querySelectorAll('.quiz-option').forEach(option => {
-            option.addEventListener('click', selectAnswer);
-        });
+        const optionsContainer = $('quizOptions');
+        optionsContainer.innerHTML = q.options.map((opt, i) => `<div class="quiz-option" data-index="${i}" role="option">${opt}</div>`).join('');
+        optionsContainer.querySelectorAll('.quiz-option').forEach(opt => opt.addEventListener('click', selectAnswer));
 
-        document.getElementById('quizFeedback').textContent = '';
-        document.getElementById('nextQuestionBtn').style.display = 'none';
-        
-        const progress = ((quiz.currentQuestionIndex) / quiz.questions.length) * 100;
-        document.getElementById('quizProgress').style.width = `${progress}%`;
+        $('quizFeedback').textContent = '';
+        $('nextQuestionBtn').style.display = 'none';
+
+        const progress = (quiz.currentQuestionIndex / quiz.questions.length) * 100;
+        $('quizProgress').style.width = `${progress}%`;
     };
 
     const selectAnswer = (e) => {
-        const selectedOption = e.target;
-        const selectedIndex = parseInt(selectedOption.dataset.index);
+        const selected = e.target;
+        const selectedIndex = parseInt(selected.dataset.index, 10);
         const question = state.quiz.questions[state.quiz.currentQuestionIndex];
         const correctIndex = question.correct;
 
-        document.querySelectorAll('.quiz-option').forEach(option => {
-            option.removeEventListener('click', selectAnswer); // Prevent multiple clicks
+        document.querySelectorAll('.quiz-option').forEach(opt => {
+            opt.removeEventListener('click', selectAnswer);
         });
 
         if (selectedIndex === correctIndex) {
-            selectedOption.classList.add('correct');
-            document.getElementById('quizFeedback').textContent = "Correct!";
-            document.getElementById('quizFeedback').style.color = 'var(--success-color)';
+            selected.classList.add('correct');
+            $('quizFeedback').textContent = "Correct!";
+            $('quizFeedback').style.color = 'var(--success-color)';
             state.quiz.score++;
         } else {
-            selectedOption.classList.add('incorrect');
-            document.getElementById(quizOptions).children[correctIndex].classList.add('correct');
-            document.getElementById('quizFeedback').textContent = "Not quite!";
-            document.getElementById('quizFeedback').style.color = 'var(--danger-color)';
+            selected.classList.add('incorrect');
+            // FIX: correctly mark the right one
+            const optionsContainer = $('quizOptions');
+            optionsContainer.children[correctIndex].classList.add('correct');
+            $('quizFeedback').textContent = "Not quite!";
+            $('quizFeedback').style.color = 'var(--danger-color)';
         }
 
-        document.getElementById('nextQuestionBtn').style.display = 'block';
+        $('nextQuestionBtn').style.display = 'block';
     };
 
     const nextQuestion = () => {
@@ -503,39 +615,84 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const showQuizResults = () => {
-        document.getElementById('quizArea').style.display = 'none';
-        document.getElementById('quizResults').style.display = 'block';
-        
+        $('quizArea').style.display = 'none';
+        $('quizResults').style.display = 'block';
+
         const finalScore = Math.round((state.quiz.score / state.quiz.questions.length) * 100);
-        document.getElementById('finalScore').textContent = `${finalScore}%`;
-        
-        let resultText = "Good effort! Keep learning and practicing.";
-        if (finalScore > 90) resultText = "Excellent! You're a true investing pro!";
-        else if (finalScore > 70) resultText = "Great job! You have a solid understanding.";
-        document.getElementById('quizResultText').textContent = resultText;
-        
-        // Update learning progress
+        $('finalScore').textContent = `${finalScore}%`;
+        $('quizResultText').textContent =
+            finalScore > 90 ? "Excellent! You're a true investing pro!" :
+            finalScore > 70 ? "Great job! You have a solid understanding." :
+            "Good effort! Keep learning and practicing.";
+
         state.learningProgress = Math.max(state.learningProgress, finalScore);
-        document.getElementById('learningProgress').style.width = `${state.learningProgress}%`;
-        document.getElementById('progressText').textContent = `Progress: ${state.learningProgress}% Complete`;
+        $('learningProgress').style.width = `${state.learningProgress}%`;
+        $('progressText').textContent = `Progress: ${state.learningProgress}% Complete`;
     };
 
     window.restartQuiz = () => {
-        document.getElementById('quizResults').style.display = 'none';
-        document.getElementById('quizStart').style.display = 'block';
+        $('quizResults').style.display = 'none';
+        $('quizStart').style.display = 'block';
+        $('quizProgress').style.width = '0%';
+    };
+
+    // --- SAVE / LOAD / RESET ---
+    const saveState = () => {
+        const dump = JSON.stringify({
+            portfolio: state.portfolio,
+            openOrders: state.openOrders,
+            currentStock: state.currentStock,
+            marketTrend: state.marketTrend,
+            stocks: Object.fromEntries(Object.entries(state.stocks).map(([sym, s]) => [sym, { ...s, history: s.history }]))
+        });
+        localStorage.setItem('investlearn_state', dump);
+        notify('Progress saved locally.', 'success');
+    };
+
+    const loadState = () => {
+        const raw = localStorage.getItem('investlearn_state');
+        if (!raw) return notify('No saved progress found.', 'error');
+        try {
+            const data = JSON.parse(raw);
+            Object.assign(state.portfolio, data.portfolio);
+            state.openOrders = data.openOrders || [];
+            state.currentStock = data.currentStock || state.currentStock;
+            state.marketTrend = data.marketTrend || state.marketTrend;
+
+            // restore histories
+            Object.keys(state.stocks).forEach(sym => {
+                if (data.stocks && data.stocks[sym] && Array.isArray(data.stocks[sym].history)) {
+                    state.stocks[sym].history = data.stocks[sym].history.slice(-200);
+                }
+            });
+            $('stockSelect').value = state.currentStock;
+            $('scenarioSelect').value = state.marketTrend;
+            updateDisplay();
+            notify('Progress loaded.', 'success');
+        } catch {
+            notify('Could not load saved data.', 'error');
+        }
+    };
+
+    const resetState = () => {
+        if (!confirm('Reset portfolio and orders?')) return;
+        state.portfolio = { cash: 100000, holdings: {}, transactions: [], initialValue: 100000 };
+        state.openOrders = [];
+        Object.values(state.stocks).forEach(s => { s.history = []; });
+        generateInitialStockHistory();
+        updateDisplay();
+        notify('Simulator reset.', 'info');
     };
 
     // --- NOTIFICATION ---
-    const showNotification = (message, type = 'info') => {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.className = `notification ${type}`;
-        notification.classList.add('show');
-        setTimeout(() => {
-            notification.classList.remove('show');
-        }, 3000);
+    const notify = (message, type = 'info') => {
+        const n = $('notification');
+        n.textContent = message;
+        n.className = `notification ${type}`;
+        n.classList.add('show');
+        setTimeout(() => n.classList.remove('show'), 3000);
     };
 
-    // --- Let's Go! ---
+    // --- GO! ---
     init();
 });
