@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestLearn Pro - Master the Markets</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+        }
+
+        .main-container {
+            margin-top: 80px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .page {
+            display: none;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .content-section {
+            background: rgba(255, 255, 255, 0.95);
+            margin: 2rem 0;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .term-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .term-card:hover {
+            transform: scale(1.05);
+        }
+
+        .term-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .simulator-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .portfolio-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stock-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        .control-group input, .control-group select {
+            padding: 0.5rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .action-button {
+            background: #4CAF50;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .action-button:hover {
+            background: #45a049;
+            transform: translateY(-1px);
+        }
+
+        .sell-button {
+            background: #f44336;
+        }
+
+        .sell-button:hover {
+            background: #da190b;
+        }
+
+        .portfolio-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .holdings-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .holding-item {
+            background: #f8f9fa;
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-chart {
+            width: 100%;
+            height: 300px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
+        }
+
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+            transform-origin: left bottom;
+            transition: all 0.3s ease;
+        }
+
+        .learning-path {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .lesson-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            cursor: pointer;
+            border-left: 4px solid #667eea;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .lesson-status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .status-beginner {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .status-intermediate {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .status-advanced {
+            background: #fce4ec;
+            color: #c2185b;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-question {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .quiz-option {
+            padding: 1rem;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: #e3f2fd;
+        }
+
+        .quiz-option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .quiz-option.correct {
+            border-color: #4CAF50;
+            background: #4CAF50;
+            color: white;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .mobile-menu {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+                background: none;
+                border: none;
+                font-size: 1.5rem;
+                color: #667eea;
+                cursor: pointer;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .simulator-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stock-controls {
+                flex-direction: column;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #f44336, #da190b);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <i class="fas fa-chart-line"></i> InvestLearn Pro
+            </div>
+            <ul class="nav-links">
+                <li><a onclick="showPage('home')">Home</a></li>
+                <li><a onclick="showPage('learn')">Learn</a></li>
+                <li><a onclick="showPage('glossary')">Glossary</a></li>
+                <li><a onclick="showPage('simulator')">Simulator</a></li>
+                <li><a onclick="showPage('strategies')">Strategies</a></li>
+                <li><a onclick="showPage('quiz')">Quiz</a></li>
+            </ul>
+            <button class="mobile-menu">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Home Page -->
+        <div id="home" class="page active">
+            <div class="hero">
+                <h1>Master the Art of Investing</h1>
+                <p>Learn, practice, and profit with our comprehensive investment platform</p>
+                <button class="cta-button" onclick="showPage('learn')">
+                    <i class="fas fa-play"></i> Start Learning
+                </button>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Comprehensive Learning</h3>
+                    <p>Master investing fundamentals with our structured curriculum covering everything from basic terms to advanced strategies.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Real-Time Simulation</h3>
+                    <p>Practice with virtual money in realistic market conditions. Test different scenarios and learn when to buy, sell, or hold.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Smart Strategies</h3>
+                    <p>Learn proven investment strategies and understand market psychology to make informed decisions like a professional.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learn Page -->
+        <div id="learn" class="page">
+            <div class="content-section">
+                <h2><i class="fas fa-book-open"></i> Investment Learning Path</h2>
+                <p>Follow our structured path to become a confident investor. Each lesson builds on the previous one.</p>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="learningProgress"></div>
+                </div>
+                <p id="progressText">Progress: 0% Complete</p>
+            </div>
+
+            <div class="learning-path">
+                <div class="lesson-card" onclick="openLesson(1)">
+                    <span class="lesson-status status-beginner">Beginner</span>
+                    <h3>1. Investment Basics</h3>
+                    <p>Understanding what investing is, risk vs reward, and the power of compound interest.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 15 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(2)">
+                    <span class="lesson-status status-beginner">Beginner</span>
+                    <h3>2. Stock Market Fundamentals</h3>
+                    <p>How stock markets work, major exchanges, and market participants.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 20 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(3)">
+                    <span class="lesson-status status-beginner">Beginner</span>
+                    <h3>3. Types of Investments</h3>
+                    <p>Stocks, bonds, ETFs, mutual funds, and other investment vehicles explained.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 25 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(4)">
+                    <span class="lesson-status status-intermediate">Intermediate</span>
+                    <h3>4. Order Types & Execution</h3>
+                    <p>Market orders, limit orders, stop-loss orders, and how to use them effectively.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 30 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(5)">
+                    <span class="lesson-status status-intermediate">Intermediate</span>
+                    <h3>5. Reading Stock Charts</h3>
+                    <p>Technical analysis basics, chart patterns, and key indicators to watch.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 35 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(6)">
+                    <span class="lesson-status status-intermediate">Intermediate</span>
+                    <h3>6. Risk Management</h3>
+                    <p>Portfolio diversification, position sizing, and protecting your capital.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 25 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(7)">
+                    <span class="lesson-status status-advanced">Advanced</span>
+                    <h3>7. Fundamental Analysis</h3>
+                    <p>Evaluating company financials, ratios, and intrinsic value calculations.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 40 minutes
+                    </div>
+                </div>
+
+                <div class="lesson-card" onclick="openLesson(8)">
+                    <span class="lesson-status status-advanced">Advanced</span>
+                    <h3>8. Market Psychology</h3>
+                    <p>Understanding emotions, market cycles, and behavioral finance principles.</p>
+                    <div style="margin-top: 1rem; color: #666; font-size: 0.9rem;">
+                        <i class="fas fa-clock"></i> 30 minutes
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Glossary Page -->
+        <div id="glossary" class="page">
+            <div class="content-section">
+                <h2><i class="fas fa-book"></i> Investment Glossary</h2>
+                <p>Essential terms every investor should know. Click on any term to learn more.</p>
+            </div>
+
+            <div class="glossary-grid" id="glossaryGrid">
+                <!-- Terms will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Simulator Page -->
+        <div id="simulator" class="page">
+            <div class="content-section">
+                <h2><i class="fas fa-chart-line"></i> Investment Simulator</h2>
+                <p>Practice trading with virtual money. Learn when to buy, sell, and hold in different market conditions.</p>
+            </div>
+
+            <div class="simulator-container">
+                <div class="chart-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 id="currentStock">AAPL - Apple Inc.</h3>
+                        <div id="currentPrice" style="font-size: 1.5rem; font-weight: bold; color: #4CAF50;">$150.00</div>
+                    </div>
+                    
+                    <div class="price-chart" id="priceChart">
+                        <canvas id="chartCanvas" width="600" height="280"></canvas>
+                    </div>
+                    
+                    <div class="stock-controls">
+                        <div class="control-group">
+                            <label>Select Stock:</label>
+                            <select id="stockSelect" onchange="changeStock()">
+                                <option value="AAPL">AAPL - Apple Inc.</option>
+                                <option value="GOOGL">GOOGL - Alphabet Inc.</option>
+                                <option value="MSFT">MSFT - Microsoft Corp.</option>
+                                <option value="AMZN">AMZN - Amazon.com Inc.</option>
+                                <option value="TSLA">TSLA - Tesla Inc.</option>
+                                <option value="NVDA">NVDA - NVIDIA Corp.</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Order Type:</label>
+                            <select id="orderType">
+                                <option value="market">Market Order</option>
+                                <option value="limit">Limit Order</option>
+                                <option value="stop">Stop-Loss Order</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Shares:</label>
+                            <input type="number" id="shareAmount" value="10" min="1" max="1000">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label>Price (for limit/stop):</label>
+                            <input type="number" id="limitPrice" step="0.01" placeholder="Optional">
+                        </div>
+                        
+                        <div class="control-group">
+                            <button class="action-button" onclick="buyStock()">
+                                <i class="fas fa-arrow-up"></i> Buy
+                            </button>
+                            <button class="action-button sell-button" onclick="sellStock()">
+                                <i class="fas fa-arrow-down"></i> Sell
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="portfolio-panel">
+                    <div class="portfolio-summary">
+                        <h3><i class="fas fa-wallet"></i> Portfolio</h3>
+                        <div style="margin: 1rem 0;">
+                            <div>Cash: $<span id="cashBalance">10000.00</span></div>
+                            <div>Portfolio Value: $<span id="portfolioValue">0.00</span></div>
+                            <div style="font-size: 1.2rem; font-weight: bold; margin-top: 0.5rem;">
+                                Total: $<span id="totalValue">10000.00</span>
+                            </div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">
+                                P&L: $<span id="totalPnL">+0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4>Your Holdings</h4>
+                    <div class="holdings-list" id="holdingsList">
+                        <div style="text-align: center; color: #666; padding: 2rem;">
+                            No holdings yet. Start investing!
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h4>Recent Transactions</h4>
+                        <div id="transactionHistory" style="max-height: 200px; overflow-y: auto; font-size: 0.9rem;">
+                            <div style="text-align: center; color: #666; padding: 1rem;">
+                                No transactions yet.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strategies Page -->
+        <div id="strategies" class="page">
+            <div class="content-section">
+                <h2><i class="fas fa-lightbulb"></i> Investment Strategies</h2>
+                <p>Learn proven strategies that successful investors use to build wealth over time.</p>
+            </div>
+
+            <div class="learning-path">
+                <div class="lesson-card" onclick="showStrategy('buyhold')">
+                    <span class="lesson-status status-beginner">Beginner</span>
+                    <h3>Buy and Hold</h3>
+                    <p>The classic long-term strategy focusing on quality companies and time in market.</p>
+                </div>
+
+                <div class="lesson-card" onclick="showStrategy('dca')">
+                    <span class="lesson-status status-beginner">Beginner</span>
+                    <h3>Dollar-Cost Averaging</h3>
+                    <p>Reduce risk by investing fixed amounts regularly regardless of market conditions.</p>
+                </div>
+
+                <div class="lesson-card" onclick="showStrategy('value')">
+                    <span class="lesson-status status-intermediate">Intermediate</span>
+                    <h3>Value Investing</h3>
+                    <p>Find undervalued companies trading below their intrinsic worth.</p>
+                </div>
+
+                <div class="lesson-card" onclick="showStrategy('growth')">
+                    <span class="lesson-status status-intermediate">Intermediate</span>
+                    <h3>Growth Investing</h3>
+                    <p>Invest in companies with strong earnings growth potential.</p>
+                </div>
+
+                <div class="lesson-card" onclick="showStrategy('dividend')">
+                    <span class="lesson-status status-intermediate">Intermediate</span>
+                    <h3>Dividend Investing</h3>
+                    <p>Build income through companies that pay regular dividends.</p>
+                </div>
+
+                <div class="lesson-card" onclick="showStrategy('momentum')">
+                    <span class="lesson-status status-advanced">Advanced</span>
+                    <h3>Momentum Trading</h3>
+                    <p>Capitalize on trends and market momentum with technical analysis.</p>
+                </div>
+            </div>
+
+            <div id="strategyDetails" class="content-section" style="display: none;">
+                <!-- Strategy details will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Quiz Page -->
+        <div id="quiz" class="page">
+            <div class="content-section">
+                <h2><i class="fas fa-question-circle"></i> Investment Knowledge Quiz</h2>
+                <p>Test your knowledge and track your progress as you learn.</p>
+            </div>
+
+            <div class="quiz-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="quizProgress"></div>
+                </div>
+                <div style="text-align: center; margin: 1rem 0;">
+                    Question <span id="currentQuestion">1</span> of <span id="totalQuestions">10</span>
+                </div>
+
+                <div class="quiz-question" id="questionText">
+                    What is the primary benefit of diversification in investing?
+                </div>
+
+                <div class="quiz-options" id="quizOptions">
+                    <!-- Options will be populated by JavaScript -->
+                </div>
+
+                <div style="text-align: center; margin: 2rem 0;">
+                    <button class="action-button" id="nextButton" onclick="nextQuestion()" disabled>
+                        Next Question
+                    </button>
+                </div>
+
+                <div id="quizResults" style="display: none; text-align: center;">
+                    <h3>Quiz Complete!</h3>
+                    <div style="font-size: 2rem; margin: 1rem 0;">
+                        Score: <span id="finalScore">0</span>%
+                    </div>
+                    <button class="action-button" onclick="restartQuiz()">
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+
+    <script>
+        // Global state
+        let currentPage = 'home';
+        let portfolio = {
+            cash: 10000,
+            holdings: {},
+            transactions: []
+        };
+        
+        let stocks = {
+            AAPL: { name: 'Apple Inc.', price: 150.00, history: [] },
+            GOOGL: { name: 'Alphabet Inc.', price: 2800.00, history: [] },
+            MSFT: { name: 'Microsoft Corp.', price: 300.00, history: [] },
+            AMZN: { name: 'Amazon.com Inc.', price: 3200.00, history: [] },
+            TSLA: { name: 'Tesla Inc.', price: 800.00, history: [] },
+            NVDA: { name: 'NVIDIA Corp.', price: 450.00, history: [] }
+        };
+        
+        let currentStock = 'AAPL';
+        let quizData = [];
+        let currentQuestionIndex = 0;
+        let quizScore = 0;
+        let learningProgress = 0;
+
+        // Glossary terms
+        const glossaryTerms = [
+            {
+                term: "Bull Market",
+                definition: "A period of rising stock prices and investor optimism."
+            },
+            {
+                term: "Bear Market", 
+                definition: "A period of falling stock prices, typically 20% or more from recent highs."
+            },
+            {
+                term: "Dividend",
+                definition: "A payment made by companies to shareholders from profits."
+            },
+            {
+                term: "P/E Ratio",
+                definition: "Price-to-Earnings ratio, comparing stock price to earnings per share."
+            },
+            {
+                term: "Market Cap",
+                definition: "Total value of a company's shares (price per share × shares outstanding)."
+            },
+            {
+                term: "Volatility",
+                definition: "The degree of price fluctuation in a stock or market."
+            },
+            {
+                term: "Liquidity",
+                definition: "How easily an asset can be bought or sold without affecting its price."
+            },
+            {
+                term: "ETF",
+                definition: "Exchange-Traded Fund - a basket of securities that trades like a stock."
+            },
+            {
+                term: "Mutual Fund",
+                definition: "Investment vehicle pooling money from many investors to buy securities."
+            },
+            {
+                term: "Diversification",
+                definition: "Spreading investments across different assets to reduce risk."
+            },
+            {
+                term: "Stop Loss",
+                definition: "An order to sell a stock when it falls to a certain price."
+            },
+            {
+                term: "Limit Order",
+                definition: "An order to buy or sell at a specific price or better."
+            },
+            {
+                term: "Market Order",
+                definition: "An order to buy or sell immediately at the current market price."
+            },
+            {
+                term: "Blue Chip",
+                definition: "Large, established companies with stable earnings and dividends."
+            },
+            {
+                term: "ROI",
+                definition: "Return on Investment - percentage gain or loss on an investment."
+            },
+            {
+                term: "Asset Allocation",
+                definition: "Distribution of investments across different asset classes."
+            }
+        ];
+
+        // Quiz questions
+        const quizQuestions = [
+            {
+                question: "What is the primary benefit of diversification in investing?",
+                options: [
+                    "Guaranteeing profits",
+                    "Reducing risk by spreading investments",
+                    "Increasing transaction fees",
+                    "Focusing on one sector"
+                ],
+                correct: 1
+            },
+            {
+                question: "What does P/E ratio measure?",
+                options: [
+                    "Price divided by Earnings per share",
+                    "Profit divided by Equity",
+                    "Price divided by Exchange rate",
+                    "Portfolio divided by Expenses"
+                ],
+                correct: 0
+            },
+            {
+                question: "When should you use a stop-loss order?",
+                options: [
+                    "To guarantee profits",
+                    "To limit potential losses",
+                    "To increase dividends",
+                    "To avoid taxes"
+                ],
+                correct: 1
+            },
+            {
+                question: "What characterizes a bear market?",
+                options: [
+                    "Rising prices and optimism",
+                    "Stable prices for months",
+                    "Declining prices of 20% or more",
+                    "High dividend payments"
+                ],
+                correct: 2
+            },
+            {
+                question: "What is dollar-cost averaging?",
+                options: [
+                    "Buying stocks only when prices are low",
+                    "Investing the same amount regularly regardless of price",
+                    "Selling stocks at market peaks",
+                    "Calculating average stock prices"
+                ],
+                correct: 1
+            },
+            {
+                question: "What does market cap represent?",
+                options: [
+                    "Maximum price a stock can reach",
+                    "Total value of a company's shares",
+                    "Daily trading volume",
+                    "Company's annual revenue"
+                ],
+                correct: 1
+            },
+            {
+                question: "Which order type guarantees execution but not price?",
+                options: [
+                    "Limit order",
+                    "Stop order",
+                    "Market order",
+                    "Fill-or-kill order"
+                ],
+                correct: 2
+            },
+            {
+                question: "What is the main advantage of ETFs over mutual funds?",
+                options: [
+                    "Higher returns guaranteed",
+                    "Lower minimum investment",
+                    "Can be traded during market hours",
+                    "No management fees"
+                ],
+                correct: 2
+            },
+            {
+                question: "What does high liquidity mean for a stock?",
+                options: [
+                    "It pays high dividends",
+                    "It can be easily bought and sold",
+                    "It has high volatility",
+                    "It's overpriced"
+                ],
+                correct: 1
+            },
+            {
+                question: "What is the best strategy for beginner investors?",
+                options: [
+                    "Day trading for quick profits",
+                    "Buying only tech stocks",
+                    "Long-term investing with diversification",
+                    "Timing the market perfectly"
+                ],
+                correct: 2
+            }
+        ];
+
+        // Initialize the application
+        function init() {
+            generateStockHistory();
+            updateChart();
+            updatePortfolio();
+            populateGlossary();
+            initializeQuiz();
+            startMarketSimulation();
+        }
+
+        // Page navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+            currentPage = pageId;
+            
+            if (pageId === 'simulator') {
+                updateChart();
+            }
+        }
+
+        // Stock market simulation
+        function generateStockHistory() {
+            Object.keys(stocks).forEach(symbol => {
+                const basePrice = stocks[symbol].price;
+                stocks[symbol].history = [];
+                
+                for (let i = 0; i < 100; i++) {
+                    const change = (Math.random() - 0.5) * 0.1;
+                    const newPrice = i === 0 ? basePrice : stocks[symbol].history[i-1] * (1 + change);
+                    stocks[symbol].history.push(Math.max(newPrice, basePrice * 0.5));
+                }
+                
+                stocks[symbol].price = stocks[symbol].history[stocks[symbol].history.length - 1];
+            });
+        }
+
+        function updateStockPrices() {
+            Object.keys(stocks).forEach(symbol => {
+                const change = (Math.random() - 0.5) * 0.02;
+                const newPrice = stocks[symbol].price * (1 + change);
+                stocks[symbol].price = Math.max(newPrice, stocks[symbol].price * 0.8);
+                stocks[symbol].history.push(stocks[symbol].price);
+                
+                if (stocks[symbol].history.length > 100) {
+                    stocks[symbol].history.shift();
+                }
+            });
+            
+            if (currentPage === 'simulator') {
+                updateChart();
+                updatePortfolio();
+            }
+        }
+
+        function updateChart() {
+            const canvas = document.getElementById('chartCanvas');
+            const ctx = canvas.getContext('2d');
+            const stock = stocks[currentStock];
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const history = stock.history;
+            const minPrice = Math.min(...history);
+            const maxPrice = Math.max(...history);
+            const priceRange = maxPrice - minPrice;
+            
+            // Draw grid
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 5; i++) {
+                const y = (canvas.height / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+            
+            // Draw price line
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            history.forEach((price, index) => {
+                const x = (canvas.width / (history.length - 1)) * index;
+                const y = canvas.height - ((price - minPrice) / priceRange) * canvas.height;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+            
+            // Update price display
+            document.getElementById('currentPrice').textContent = `${stock.price.toFixed(2)}`;
+            document.getElementById('currentStock').textContent = `${currentStock} - ${stock.name}`;
+        }
+
+        function changeStock() {
+            currentStock = document.getElementById('stockSelect').value;
+            updateChart();
+        }
+
+        // Portfolio management
+        function buyStock() {
+            const shares = parseInt(document.getElementById('shareAmount').value);
+            const orderType = document.getElementById('orderType').value;
+            const limitPrice = parseFloat(document.getElementById('limitPrice').value);
+            const currentPrice = stocks[currentStock].price;
+            
+            let executionPrice = currentPrice;
+            
+            if (orderType === 'limit' && limitPrice) {
+                if (limitPrice < currentPrice) {
+                    showNotification('Limit price too low for buy order', 'error');
+                    return;
+                }
+                executionPrice = limitPrice;
+            }
+            
+            const totalCost = shares * executionPrice;
+            
+            if (totalCost > portfolio.cash) {
+                showNotification('Insufficient funds', 'error');
+                return;
+            }
+            
+            portfolio.cash -= totalCost;
+            
+            if (!portfolio.holdings[currentStock]) {
+                portfolio.holdings[currentStock] = { shares: 0, avgPrice: 0, totalCost: 0 };
+            }
+            
+            const holding = portfolio.holdings[currentStock];
+            holding.totalCost += totalCost;
+            holding.shares += shares;
+            holding.avgPrice = holding.totalCost / holding.shares;
+            
+            portfolio.transactions.unshift({
+                type: 'BUY',
+                symbol: currentStock,
+                shares: shares,
+                price: executionPrice,
+                total: totalCost,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            updatePortfolio();
+            showNotification(`Bought ${shares} shares of ${currentStock}`, 'success');
+        }
+
+        function sellStock() {
+            const shares = parseInt(document.getElementById('shareAmount').value);
+            const orderType = document.getElementById('orderType').value;
+            const limitPrice = parseFloat(document.getElementById('limitPrice').value);
+            const currentPrice = stocks[currentStock].price;
+            
+            if (!portfolio.holdings[currentStock] || portfolio.holdings[currentStock].shares < shares) {
+                showNotification('Insufficient shares to sell', 'error');
+                return;
+            }
+            
+            let executionPrice = currentPrice;
+            
+            if (orderType === 'limit' && limitPrice) {
+                if (limitPrice > currentPrice) {
+                    showNotification('Limit price too high for sell order', 'error');
+                    return;
+                }
+                executionPrice = limitPrice;
+            }
+            
+            const totalRevenue = shares * executionPrice;
+            
+            portfolio.cash += totalRevenue;
+            
+            const holding = portfolio.holdings[currentStock];
+            holding.shares -= shares;
+            
+            if (holding.shares === 0) {
+                delete portfolio.holdings[currentStock];
+            } else {
+                holding.totalCost = holding.shares * holding.avgPrice;
+            }
+            
+            portfolio.transactions.unshift({
+                type: 'SELL',
+                symbol: currentStock,
+                shares: shares,
+                price: executionPrice,
+                total: totalRevenue,
+                timestamp: new Date().toLocaleString()
+            });
+            
+            updatePortfolio();
+            showNotification(`Sold ${shares} shares of ${currentStock}`, 'success');
+        }
+
+        function updatePortfolio() {
+            document.getElementById('cashBalance').textContent = portfolio.cash.toFixed(2);
+            
+            let portfolioValue = 0;
+            let totalPnL = 0;
+            
+            Object.keys(portfolio.holdings).forEach(symbol => {
+                const holding = portfolio.holdings[symbol];
+                const currentValue = holding.shares * stocks[symbol].price;
+                portfolioValue += currentValue;
+                totalPnL += currentValue - holding.totalCost;
+            });
+            
+            document.getElementById('portfolioValue').textContent = portfolioValue.toFixed(2);
+            document.getElementById('totalValue').textContent = (portfolio.cash + portfolioValue).toFixed(2);
+            
+            const pnlElement = document.getElementById('totalPnL');
+            pnlElement.textContent = (totalPnL >= 0 ? '+' : '') + totalPnL.toFixed(2);
+            pnlElement.style.color = totalPnL >= 0 ? '#4CAF50' : '#f44336';
+            
+            updateHoldingsList();
+            updateTransactionHistory();
+        }
+
+        function updateHoldingsList() {
+            const holdingsList = document.getElementById('holdingsList');
+            
+            if (Object.keys(portfolio.holdings).length === 0) {
+                holdingsList.innerHTML = '<div style="text-align: center; color: #666; padding: 2rem;">No holdings yet. Start investing!</div>';
+                return;
+            }
+            
+            let html = '';
+            Object.keys(portfolio.holdings).forEach(symbol => {
+                const holding = portfolio.holdings[symbol];
+                const currentPrice = stocks[symbol].price;
+                const currentValue = holding.shares * currentPrice;
+                const pnl = currentValue - holding.totalCost;
+                const pnlPercent = (pnl / holding.totalCost) * 100;
+                
+                html += `
+                    <div class="holding-item">
+                        <div>
+                            <strong>${symbol}</strong><br>
+                            <small>${holding.shares} shares @ ${holding.avgPrice.toFixed(2)}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <div>${currentValue.toFixed(2)}</div>
+                            <div style="color: ${pnl >= 0 ? '#4CAF50' : '#f44336'}; font-size: 0.9rem;">
+                                ${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)} (${pnlPercent.toFixed(1)}%)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            holdingsList.innerHTML = html;
+        }
+
+        function updateTransactionHistory() {
+            const historyElement = document.getElementById('transactionHistory');
+            
+            if (portfolio.transactions.length === 0) {
+                historyElement.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">No transactions yet.</div>';
+                return;
+            }
+            
+            let html = '';
+            portfolio.transactions.slice(0, 10).forEach(tx => {
+                html += `
+                    <div style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: ${tx.type === 'BUY' ? '#4CAF50' : '#f44336'};">
+                                ${tx.type} ${tx.shares} ${tx.symbol}
+                            </span>
+                            <span>${tx.total.toFixed(2)}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #666;">${tx.timestamp}</div>
+                    </div>
+                `;
+            });
+            
+            historyElement.innerHTML = html;
+        }
+
+        // Glossary
+        function populateGlossary() {
+            const glossaryGrid = document.getElementById('glossaryGrid');
+            let html = '';
+            
+            glossaryTerms.forEach(item => {
+                html += `
+                    <div class="term-card" onclick="showTermDefinition('${item.term}', '${item.definition}')">
+                        <div class="term-title">${item.term}</div>
+                        <div>${item.definition}</div>
+                    </div>
+                `;
+            });
+            
+            glossaryGrid.innerHTML = html;
+        }
+
+        function showTermDefinition(term, definition) {
+            showNotification(`${term}: ${definition}`, 'info');
+        }
+
+        // Quiz functionality
+        function initializeQuiz() {
+            quizData = [...quizQuestions];
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = quizData[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = quizData.length;
+            
+            const optionsContainer = document.getElementById('quizOptions');
+            let html = '';
+            
+            question.options.forEach((option, index) => {
+                html += `
+                    <div class="quiz-option" onclick="selectOption(${index})">
+                        ${option}
+                    </div>
+                `;
+            });
+            
+            optionsContainer.innerHTML = html;
+            
+            document.getElementById('nextButton').disabled = true;
+            updateQuizProgress();
+        }
+
+        function selectOption(selectedIndex) {
+            const options = document.querySelectorAll('.quiz-option');
+            const question = quizData[currentQuestionIndex];
+            
+            options.forEach((option, index) => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === question.correct) {
+                quizScore++;
+            }
+            
+            document.getElementById('nextButton').disabled = false;
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= quizData.length) {
+                showQuizResults();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showQuizResults() {
+            const percentage = Math.round((quizScore / quizData.length) * 100);
+            document.getElementById('finalScore').textContent = percentage;
+            document.getElementById('quizResults').style.display = 'block';
+            document.querySelector('.quiz-question').style.display = 'none';
+            document.getElementById('quizOptions').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'none';
+            
+            updateLearningProgress(percentage);
+        }
+
+        function restartQuiz() {
+            document.getElementById('quizResults').style.display = 'none';
+            document.querySelector('.quiz-question').style.display = 'block';
+            document.getElementById('quizOptions').style.display = 'grid';
+            document.getElementById('nextButton').style.display = 'inline-block';
+            
+            initializeQuiz();
+        }
+
+        function updateQuizProgress() {
+            const progress = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            document.getElementById('quizProgress').style.width = progress + '%';
+        }
+
+        function updateLearningProgress(quizScore) {
+            learningProgress = Math.max(learningProgress, quizScore);
+            document.getElementById('learningProgress').style.width = learningProgress + '%';
+            document.getElementById('progressText').textContent = `Progress: ${learningProgress}% Complete`;
+        }
+
+        // Lesson functionality
+        function openLesson(lessonNumber) {
+            const lessons = {
+                1: {
+                    title: "Investment Basics",
+                    content: `
+                        <h3>What is Investing?</h3>
+                        <p>Investing is putting money to work in order to start or expand a business or project or to purchase an asset or interest with the goal of generating income or profit.</p>
+                        
+                        <h3>Risk vs Reward</h3>
+                        <p>Higher potential returns typically come with higher risk. Understanding this relationship is crucial for making informed investment decisions.</p>
+                        
+                        <h3>Compound Interest</h3>
+                        <p>Einstein called it the "eighth wonder of the world." Compound interest is earning interest on your interest, which can dramatically grow your wealth over time.</p>
+                        
+                        <h3>Key Takeaways:</h3>
+                        <ul>
+                            <li>Start investing early to take advantage of compound interest</li>
+                            <li>Understand your risk tolerance</li>
+                            <li>Diversification helps manage risk</li>
+                            <li>Time in market beats timing the market</li>
+                        </ul>
+                    `
+                },
+                2: {
+                    title: "Stock Market Fundamentals",
+                    content: `
+                        <h3>How Stock Markets Work</h3>
+                        <p>Stock markets are platforms where buyers and sellers trade shares of publicly traded companies. They provide liquidity and price discovery.</p>
+                        
+                        <h3>Major Exchanges</h3>
+                        <p><strong>NYSE:</strong> New York Stock Exchange - largest by market cap<br>
+                        <strong>NASDAQ:</strong> Electronic exchange, tech-heavy<br>
+                        <strong>Others:</strong> LSE, TSE, Euronext, etc.</p>
+                        
+                        <h3>Market Participants</h3>
+                        <ul>
+                            <li><strong>Retail Investors:</strong> Individual investors like you</li>
+                            <li><strong>Institutional Investors:</strong> Pension funds, mutual funds, hedge funds</li>
+                            <li><strong>Market Makers:</strong> Provide liquidity by buying and selling</li>
+                            <li><strong>Brokers:</strong> Facilitate trades between buyers and sellers</li>
+                        </ul>
+                    `
+                }
+            };
+            
+            const lesson = lessons[lessonNumber];
+            if (lesson) {
+                showNotification(`Opening lesson: ${lesson.title}`, 'info');
+                // In a real implementation, this would open a detailed lesson view
+            }
+        }
+
+        // Strategy details
+        function showStrategy(strategyType) {
+            const strategies = {
+                buyhold: {
+                    title: "Buy and Hold Strategy",
+                    content: `
+                        <h3>Overview</h3>
+                        <p>Buy and hold is a long-term investment strategy where investors purchase securities and hold them for extended periods, regardless of short-term market fluctuations.</p>
+                        
+                        <h3>Pros:</h3>
+                        <ul>
+                            <li>Simple to implement</li>
+                            <li>Low transaction costs</li>
+                            <li>Benefits from compound growth</li>
+                            <li>Tax efficient (long-term capital gains)</li>
+                        </ul>
+                        
+                        <h3>Cons:</h3>
+                        <ul>
+                            <li>Requires patience during downturns</li>
+                            <li>May miss short-term opportunities</li>
+                            <li>Vulnerable to market crashes</li>
+                        </ul>
+                        
+                        <h3>Best For:</h3>
+                        <p>Beginner investors with long time horizons who want a simple, low-maintenance approach.</p>
+                    `
+                },
+                dca: {
+                    title: "Dollar-Cost Averaging",
+                    content: `
+                        <h3>Overview</h3>
+                        <p>Dollar-cost averaging involves investing a fixed amount of money at regular intervals, regardless of market conditions.</p>
+                        
+                        <h3>How It Works:</h3>
+                        <p>By investing the same dollar amount regularly, you buy more shares when prices are low and fewer when prices are high, potentially reducing your average cost per share over time.</p>
+                        
+                        <h3>Benefits:</h3>
+                        <ul>
+                            <li>Reduces impact of volatility</li>
+                            <li>Eliminates need to time the market</li>
+                            <li>Builds disciplined investing habits</li>
+                            <li>Reduces emotional decision-making</li>
+                        </ul>
+                        
+                        <h3>Example:</h3>
+                        <p>Investing $500 monthly in an index fund, regardless of whether the market is up or down.</p>
+                    `
+                }
+            };
+            
+            const strategy = strategies[strategyType];
+            if (strategy) {
+                const detailsDiv = document.getElementById('strategyDetails');
+                detailsDiv.innerHTML = `
+                    <h2>${strategy.title}</h2>
+                    ${strategy.content}
+                `;
+                detailsDiv.style.display = 'block';
+                detailsDiv.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Notification system
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Start market simulation
+        function startMarketSimulation() {
+            setInterval(updateStockPrices, 5000); // Update every 5 seconds
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
